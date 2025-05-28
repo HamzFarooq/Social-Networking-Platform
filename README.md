@@ -27,20 +27,20 @@ vector<User> users;
 vector<Post> posts;
 User* loggedInUser = nullptr;
 
-// 💾 File Operations
+// --- File Operations ---
 
 void saveUsers() {
     ofstream fout("users.txt");
     for (auto &u : users) {
         fout << u.username << "\n" << u.password << "\n";
-
         fout << u.friends.size() << "\n";
-        for (auto &f : u.friends)
+        for (auto &f : u.friends) {
             fout << f << "\n";
-
+        }
         fout << u.friendRequests.size() << "\n";
-        for (auto &r : u.friendRequests)
+        for (auto &r : u.friendRequests) {
             fout << r << "\n";
+        }
     }
     fout.close();
 }
@@ -84,8 +84,9 @@ void savePosts() {
     for (auto &p : posts) {
         fout << p.author << "\n" << p.content << "\n";
         fout << p.comments.size() << "\n";
-        for (auto &c : p.comments)
+        for (auto &c : p.comments) {
             fout << c.author << "\n" << c.content << "\n";
+        }
     }
     fout.close();
 }
@@ -116,7 +117,7 @@ void loadPosts() {
     fin.close();
 }
 
-// 👤 User Management
+// --- Core Features ---
 
 void signup() {
     string uname, pwd;
@@ -125,11 +126,12 @@ void signup() {
     cout << "Enter password: ";
     cin >> pwd;
 
-    for (auto &u : users)
+    for (auto &u : users) {
         if (u.username == uname) {
             cout << "Username already taken!\n";
             return;
         }
+    }
 
     users.push_back({uname, pwd});
     cout << "Signup successful! You can now login.\n";
@@ -142,24 +144,23 @@ bool login() {
     cout << "Enter password: ";
     cin >> pwd;
 
-    for (auto &u : users)
+    for (auto &u : users) {
         if (u.username == uname && u.password == pwd) {
             loggedInUser = &u;
             cout << "Welcome, " << loggedInUser->username << "!\n";
             return true;
         }
-
+    }
     cout << "Invalid credentials!\n";
     return false;
 }
-
-// ✍️ Posting & Commenting
 
 void createPost() {
     cin.ignore();
     string content;
     cout << "Enter your post content: ";
     getline(cin, content);
+
     posts.push_back({loggedInUser->username, content});
     cout << "Post created successfully.\n";
 }
@@ -174,8 +175,9 @@ void viewPosts() {
         cout << i+1 << ". " << posts[i].author << ": " << posts[i].content << "\n";
         if (!posts[i].comments.empty()) {
             cout << "   Comments:\n";
-            for (auto &c : posts[i].comments)
+            for (auto &c : posts[i].comments) {
                 cout << "     - " << c.author << ": " << c.content << "\n";
+            }
         }
     }
 }
@@ -203,7 +205,7 @@ void addComment() {
     cout << "Comment added.\n";
 }
 
-// 🤝 Friends
+// Friend Requests and Friends
 
 void sendFriendRequest() {
     string friendName;
@@ -216,28 +218,30 @@ void sendFriendRequest() {
     }
 
     User* friendUser = nullptr;
-    for (auto &u : users)
+    for (auto &u : users) {
         if (u.username == friendName) {
             friendUser = &u;
             break;
         }
-
+    }
     if (!friendUser) {
         cout << "User not found!\n";
         return;
     }
 
-    for (auto &f : loggedInUser->friends)
+    for (auto &f : loggedInUser->friends) {
         if (f == friendName) {
             cout << "You are already friends.\n";
             return;
         }
+    }
 
-    for (auto &req : friendUser->friendRequests)
+    for (auto &req : friendUser->friendRequests) {
         if (req == loggedInUser->username) {
             cout << "Friend request already sent.\n";
             return;
         }
+    }
 
     friendUser->friendRequests.push_back(loggedInUser->username);
     cout << "Friend request sent to " << friendName << ".\n";
@@ -250,9 +254,9 @@ void handleFriendRequests() {
     }
 
     cout << "Friend Requests:\n";
-    for (size_t i = 0; i < loggedInUser->friendRequests.size(); i++)
+    for (size_t i = 0; i < loggedInUser->friendRequests.size(); i++) {
         cout << i+1 << ". " << loggedInUser->friendRequests[i] << "\n";
-
+    }
     cout << "Enter request number to accept (0 to cancel): ";
     int choice; cin >> choice;
     if (choice < 1 || choice > (int)loggedInUser->friendRequests.size()) {
@@ -263,11 +267,12 @@ void handleFriendRequests() {
     string requester = loggedInUser->friendRequests[choice - 1];
 
     loggedInUser->friends.push_back(requester);
-    for (auto &u : users)
+    for (auto &u : users) {
         if (u.username == requester) {
             u.friends.push_back(loggedInUser->username);
             break;
         }
+    }
 
     loggedInUser->friendRequests.erase(loggedInUser->friendRequests.begin() + (choice - 1));
     cout << "You are now friends with " << requester << "!\n";
@@ -279,11 +284,12 @@ void viewFriends() {
         return;
     }
     cout << "Your Friends:\n";
-    for (auto &f : loggedInUser->friends)
+    for (auto &f : loggedInUser->friends) {
         cout << "- " << f << "\n";
+    }
 }
 
-// 🧭 Dashboard & Main Menu
+// Dashboard menu and main
 
 void dashboard() {
     int choice;
